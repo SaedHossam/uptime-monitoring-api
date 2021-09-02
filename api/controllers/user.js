@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const User = require("../models/user");
-const { sendMail } = require("../services/mailService");
+const { sendConfirmationMail } = require("../services/mailService");
 
 exports.user_signup = async (req, res, next) => {
   User.find({ email: req.body.email })
@@ -31,7 +31,7 @@ exports.user_signup = async (req, res, next) => {
                 // console.log(result);
                 // Send Email
                 try {
-                  sendMail(user._id, user.email)
+                  sendConfirmationMail(user._id, user.email)
                     .then((result) => console.log('Email sent...', result))
                     .catch((error) => console.log('Error...', error.message));
                   res.status(201).json({
