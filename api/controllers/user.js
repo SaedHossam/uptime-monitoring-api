@@ -28,11 +28,10 @@ exports.user_signup = async (req, res, next) => {
             user
               .save()
               .then(result => {
-                // console.log(result);
                 // Send Email
                 try {
                   sendConfirmationMail(user._id, user.email)
-                    .then((result) => console.log('Email sent...', result))
+                    .then((r) => console.log('Email sent...', r))
                     .catch((error) => console.log('Error...', error.message));
                   res.status(201).json({
                     message: "User created"
@@ -77,7 +76,6 @@ exports.user_login = (req, res, next) => {
         if (result) {
           const token = jwt.sign(
             {
-              email: user[0].email,
               userId: user[0]._id
             },
             process.env.SECRET,

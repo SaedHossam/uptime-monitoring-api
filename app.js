@@ -6,6 +6,10 @@ const mongoose = require("mongoose");
 const dotenv = require('dotenv');
 
 const userRoutes = require('./api/routes/user');
+const checkRoutes = require('./api/routes/check');
+const reportRoute = require('./api/routes/report');
+
+const visitService = require('./api/services/visitService');
 
 // configure enviroment variables
 dotenv.config();
@@ -15,8 +19,8 @@ mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useUnifiedTopology
 
 // CONNECTION EVENTS
 mongoose.connection.once('connected', function () {
-    console.log("Database connected to Mongo cloud")
-
+    console.log("Database connected to Mongo cloud");
+    visitService.init();
 })
 mongoose.connection.on('error', function (err) {
     console.log("MongoDB connection error: " + err)
@@ -52,6 +56,8 @@ app.use((req, res, next) => {
 
 // Routes which should handle requests
 app.use("/user", userRoutes);
+app.use("/check", checkRoutes);
+app.use("/report", reportRoute);
 // 404 not found
 app.use((req, res, next) => {
   const error = new Error("Not found");

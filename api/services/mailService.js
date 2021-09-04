@@ -2,6 +2,8 @@ const nodemailer = require('nodemailer');
 const { google } = require('googleapis');
 const jwt = require('jsonwebtoken');
 
+const Check = require('../models/check')
+const User = require('../models/user')
 
 async function sendConfirmationMail(id, email) {
     jwt.sign(
@@ -65,4 +67,19 @@ async function sendEmail(mailOptions) {
     }
 
 }
-module.exports = { sendConfirmationMail }
+
+async function notifyUser(check){
+    const user = await User.findOne({_id: check.user_id}).exec();
+
+
+    const mailOptions = {
+        from: `Saed Hossam <${process.env.GMAIL_USER}>`,
+        to: user.email,
+        subject: `${check.name} is ${check.status}`,
+        text: `Your Check '${check.name} is now ${check.status}\nURL: ${check.url}`,
+        html: `Your Check '${check.name} is now ${check.status}\nURL:  <a href="${check.url}">${check.url}</a>`,
+    };
+
+    sendEmail(mailOptions);
+}
+module.exports = { sendConfirmationMail, notifyUser }
