@@ -31,7 +31,7 @@ exports.user_signup = async (req, res, next) => {
                 // Send Email
                 try {
                   sendConfirmationMail(user._id, user.email)
-                    .then((r) => console.log('Email sent...', r))
+                    .then(() => console.log('Email sent...'))
                     .catch((error) => console.log('Error...', error.message));
                   res.status(201).json({
                     message: "User created"

@@ -4,7 +4,8 @@ const checkSchema = new mongoose.Schema({
     // User Id
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User',
+        required: true
     },
     // name - The name of the check.
     name: {

@@ -1,0 +1,433 @@
+swagger: "2.0"
+info:
+  description: "uptime monitoring RESTful API server which allows authorized users to enter URLs they want monitored, and get detailed uptime reports about their availability, average response time, and total uptime/downtime."
+  version: "1.0.0"
+  title: "Uptime monitoring RESTful API server"
+  contact:
+    email: "said.hossam12@gmail.com"
+  
+  
+
+tags:
+- name: "user"
+  description: "Operations about user"
+- name: "Check"
+  description: "Operations about Check"
+- name: "Report"
+  description: "Operations about Report"
+  
+paths:
+  /user/signup:
+    post:
+      tags:
+      - "user"
+      summary: "Creates list of users with given input array"
+      description: ""
+      operationId: "createUser"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "user object"
+        required: true
+        schema:
+          type: "object"
+          $ref: "#/definitions/User"
+      responses:
+        200:
+          description: "successful operation"
+        500:
+          description: Server Error
+  /user/login:
+    post:
+      tags:
+      - "user"
+      summary: "Logs user into the system"
+      description: ""
+      operationId: "loginUser"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "The user name for login"
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+          headers:
+            X-Rate-Limit:
+              type: "integer"
+              format: "int32"
+              description: "calls per hour allowed by the user"
+            X-Expires-After:
+              type: "string"
+              format: "date-time"
+              description: "date in UTC when token expires"
+        "401":
+          description: "Invalid username/password OR Email not Confirmed"
+  /user/confirmation/{token}:
+    get:
+      tags:
+      - "user"
+      summary: "Confirm Email"
+      description: ""
+      operationId: "confirmEmail"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "token"
+        in: "path"
+        description: "confirmation token"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: string
+        500:
+          description: Server Error
+
+  /check:
+    get:
+      tags:
+        - Check
+      summary: "Get all user Checks"
+      description: ""
+      operationId: "getAllChecks"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: array
+            items: 
+              $ref: "#/definitions/Check"
+        "500":
+          description: "Server Error"
+      security:
+      - Bearer:
+        - "write:check"
+        - "read:check"
+    post:
+      responses:
+        201:
+          description: Success
+          schema:
+            $ref: "#/definitions/Check"
+        500:
+          description: Server Error
+      tags:
+      - "Check"
+      summary: "Add a new Check to be monitored"
+      description: ""
+      operationId: "addCheck"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Check object that needs to be added"
+        required: true
+        schema:
+          $ref: "#/definitions/Check"        
+      security:
+      - Bearer:
+        - "write:check"
+        - "read:check"
+      deprecated: false
+  /check/{checkId}:
+    delete:
+      tags:
+      - "Check"
+      summary: "Delete check by ID"
+      description: ""
+      operationId: "deleteCheckById"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "checkId"
+        in: "path"
+        description: "ID of check that needs to be deleted"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+        500:
+          description: Server Error
+        404:
+          description: Check Not Found
+      security:
+      - Bearer:
+        - "write:check"
+        - "read:check"
+    put:
+      tags:
+      - "Check"
+      summary: "Update check by ID"
+      description: ""
+      operationId: "updateCheckById"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "checkId"
+        in: "path"
+        description: "ID of check that needs to be updated"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "Check object that needs to be added"
+        required: true
+        schema:
+          $ref: "#/definitions/Check"        
+      security:
+      - Bearer:
+        - "write:check"
+        - "read:check"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Check"
+        500:
+          description: Server Error
+        404:
+          description: Not Found
+  /check/pause/{checkId}:
+    get:
+      tags:
+      - "Check"
+      summary: "pause check by ID"
+      description: ""
+      operationId: "pauseCheckById"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "checkId"
+        in: "path"
+        description: "ID of check that needs to be paused"
+        required: true
+        type: "string"
+      security:
+      - Bearer:
+        - "write:check"
+        - "read:check"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Check"
+        500:
+          description: Server Error
+        404:
+          description: Not Found
+  /check/resume/{checkId}:
+    get:
+      tags:
+      - "Check"
+      summary: "resume check by ID"
+      description: ""
+      operationId: "resumeCheckById"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "checkId"
+        in: "path"
+        description: "ID of check that needs to be resumed"
+        required: true
+        type: "string"      
+      security:
+      - Bearer:
+        - "write:check"
+        - "read:check"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Check"
+        500:
+          description: Server Error
+        404:
+          description: Not Found
+  /report/{checkId}:
+    get:
+      tags:
+        - Report
+      summary: "Get report for Check"
+      description: ""
+      operationId: "getCheckReport"
+      parameters:
+      - name: "checkId"
+        in: "path"
+        description: "ID of check that needs to be reported"
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: array
+            items: 
+              $ref: "#/definitions/Report"
+        "500":
+          description: "Server Error"
+      security:
+      - Bearer:
+        - "write:Check"
+        - "read:Check"
+        
+
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Bearer
+    in: header
+definitions:
+  Check:
+    type: "object"
+    required:
+      - name
+      - url
+      - protocol
+      - ignoreSSL
+    properties: 
+      user_id:
+          type: string
+          description: The Id of the user who created the check
+      name:
+          type: string
+          description: The name of the check
+      url:
+          type: string
+          description: The URL to be monitored
+      protocol:
+          type: string
+          description: The resource protocol name HTTP, HTTPS, or TCP
+      path:
+          type: string
+          description: A specific path to be monitored (optional)
+      port:
+          type: integer
+          description: The server port number (optional).
+      webhook:
+          type: string
+          description: A webhook URL to receive a notification on (optional)
+      timeout:
+          type: integer
+          description: (defaults to 5 seconds) - The timeout of the polling request (optional)
+      interval:
+          type: integer
+          description: (defaults to 10 minutes) - The time interval for polling requests (optional).
+      threshold:
+          type: integer
+          description: (defaults to 1 failure) - The threshold of failed requests that will create an alert (optional).
+      authentication:
+          type: object
+          properties:
+            username:
+              type: string
+            password:
+              type: string
+          description:  An HTTP authentication header, with the Basic scheme, to be sent with the polling request (optional).
+      httpHeaders:
+          type: array
+          items:
+            type: object
+            example: {'key': 'value'}
+          description:  A list of key/value pairs custom HTTP headers to be sent with the polling request (optional).
+      assert:
+          type: object
+          properties:       
+            statusCode:
+              type: integer
+              description: The response assertion to be used on the polling response (optional)
+      tags:
+          type: array
+          items:
+            type: string
+          description: A list of the check tags (optional).
+      ignoreSSL:
+          type: boolean
+          description: A flag to ignore broken/expired SSL certificates in case of using the HTTPS protocol.
+  User:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        description: Auto Generated Id
+      email:
+        type: "string"
+        description: User Email
+      password:
+        type: "string"
+        description: User Password
+    required:
+      - email
+      - password
+    xml:
+      name: "User"
+  Report:
+    type: object
+    required:
+      - check_id
+    properties: 
+      check_id:
+        type: string
+        description: Id of the check
+      status:
+        type: string
+        description: The current status of the URL. Up or Down
+      availability:
+        type: number
+        description: A percentage of the URL availability.
+      outages:
+        type: integer
+        description: The total number of URL downtimes.
+      downtime:
+        type: number
+        description: The total time, in seconds, of the URL downtime.
+      uptime:
+        type: number
+        description: The total time, in seconds, of the URL uptime.
+      responseTime:
+        type: number
+        description: The average response time for the URL.
+      history:
+        type: "array"
+        xml:
+          name: "visit"
+          wrapped: true
+        items:
+          $ref: "#/definitions/Visit"
+        description: Timestamped logs of the polling requests.
+  Visit:
+    type: object
+    properties: 
+      check_id:
+        type: string
+        description: Id of the check
+      status:
+        type: string
+        description: The current status of the URL. Up or Down
+      startTime:
+        type: number
+        description: time of the request
+      endTime:
+        type: integer
+        description: time of the response
+      duration:
+        type: number
+        description: Duration of the request.

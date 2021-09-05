@@ -4,6 +4,10 @@ const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const dotenv = require('dotenv');
+// const swaggerJsDoc = require('swagger-jsdoc');
+// const swaggerUI = require('swagger-ui-express');
+// const YAML = require('yamljs');
+// const swaggerDocument = YAML.load('./swagger.yaml');
 
 const userRoutes = require('./api/routes/user');
 const checkRoutes = require('./api/routes/check');
@@ -19,22 +23,22 @@ mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useUnifiedTopology
 
 // CONNECTION EVENTS
 mongoose.connection.once('connected', function () {
-    console.log("Database connected to Mongo cloud");
-    visitService.init();
+  console.log("Database connected to Mongo cloud");
+  visitService.init();
 })
 mongoose.connection.on('error', function (err) {
-    console.log("MongoDB connection error: " + err)
+  console.log("MongoDB connection error: " + err)
 })
 mongoose.connection.once('disconnected', function () {
-    console.log("Database disconnected")
+  console.log("Database disconnected")
 })
 
 // If Node's process ends, close the MongoDB connection
 process.on('SIGINT', function () {
-    mongoose.connection.close(function () {
-        console.log("Database disconnected through app termination")
-        process.exit(0);
-    })
+  mongoose.connection.close(function () {
+    console.log("Database disconnected through app termination")
+    process.exit(0);
+  })
 })
 
 app.use(morgan("dev"));
@@ -53,6 +57,10 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+
+// // Swagger
+// app.use('/', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 // Routes which should handle requests
 app.use("/user", userRoutes);

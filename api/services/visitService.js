@@ -7,12 +7,14 @@ const Visit = require('../models/visit');
 
 const mailService = require('../services/mailService');
 
+var intervals;
+
 function init() {
+  intervals = [];
   Check.find({ paused: false })
     .exec()
     .then(result => {
       result.forEach(c => {
-        console.log(c.name);
         run(c._id, c);
       });
     })
@@ -21,10 +23,14 @@ function init() {
     });
 }
 
+
 async function run(_id, check) {
   // SetInterval
-  setInterval(async () => {
+  var interval = setInterval(async () => {
+    intervals.push(interval);
     check = await Check.findById(_id);
+    //console.log(interval);
+    // check = await Check.findByIdAndUpdate(_id, { intervalRef: interval }, { new: true });
     var start, end, status;
     const url = check.protocol + '://' + check.url;
     if (typeof check.port != 'undefined') url += ':' + check.port;
@@ -84,7 +90,6 @@ async function updateStatus(check, status, startTime, endTime) {
       console.log('Send Mail:- Website is ', status, ' was ', check.status);
       check = await updateCheck(check, status);
       mailService.notifyUser(check);
-      //sendMailStatusUpdated(status);
     }
   }
   // 1- Create new visit
@@ -106,5 +111,8 @@ async function updateCheck(check, status) {
   return check;
 }
 
-
-module.exports = { init, run }
+function restartAll(){
+  intervals.forEach(clearInterval);
+  init();
+}
+module.exports = { init, run, restartAll }
